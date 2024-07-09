@@ -1,13 +1,10 @@
 from exif import Image
-from geopy.geocoders import Nominatim
-
 from pathlib import Path
 import os.path, time
 import shutil
 import subprocess
 import requests
 import json
-
 
 def decimal_coords(coords, ref):
     decimal_degrees = coords[0] + coords[1] / 60 + coords[2] / 3600
@@ -106,6 +103,7 @@ def process_file(i, mysorted, sort_type, new_filename):
             
     if not os.path.isfile(mysorted+"/"+year+"_"+month+"/"+get_filename(i)):
         if new_filename != "":
+            new_filename = new_filename.replace("/","_",5)
             original_filename = get_filename(i)
             extension = original_filename[-4:]
             enhanced_filename = new_filename + extension
@@ -124,7 +122,8 @@ def long_lat_to_address(long, lat):
   
     r = requests.get(url, headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
     json_addr = r.content.decode()
-    addr = json.loads(json_addr)
+    if json_addr != None:
+        addr = json.loads(json_addr)
     
     myclass = ""
     type = ""
@@ -217,11 +216,7 @@ def long_lat_to_address(long, lat):
         ident = ident[:-1]
         
     return ident
-        
-    
-
-
-
+  
 def sort_pic_or_doc_or_mov(sort_from_path, sort_to_path, sort_type):
 
     files_processed = 0
@@ -252,7 +247,7 @@ def sort_pic_or_doc_or_mov(sort_from_path, sort_to_path, sort_type):
     for i in p.glob('**/*'):
     
         files_processed = files_processed + 1
-        print ("files_processed: "+str(i)[-4:] , files_processed)
+        print ("files_processed: "+str(files_processed)+" files. extension: "+str(i)[-4:])
         
         #print(i.name, get_date(i))
         if not os.path.isdir(i):
@@ -268,8 +263,9 @@ def sort_pic_or_doc_or_mov(sort_from_path, sort_to_path, sort_type):
                             pass
                         if coordinates != "No Coordinates" and coordinates != "No EXIF":
                        
-                            print ("=== Good coordinates ===")
-                            print (coordinates)
+                            print ("=== Found good coordinates ===")
+                            print ("Renaming copied picture file to:")
+                            #print (coordinates)
                             lng = coordinates['geolocation_lng']
                             lat = coordinates['geolocation_lat']
                             imageTakenTime = coordinates['imageTakenTime']
@@ -307,10 +303,7 @@ def sort_pic_or_doc_or_mov(sort_from_path, sort_to_path, sort_type):
     return files_processed, items_processed, items_sorted
     
     
-#get_location("26.7674446, 81.109758")  
 
-#long_lat_to_address("81.109758", "26.7674446") 
-#exit(0)
                 
 '''
 How to use:
